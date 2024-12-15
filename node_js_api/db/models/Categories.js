@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
 
 const CategorySchema = new mongoose.Schema({
+    name: {type: String, required: true},
     is_active: {type: Boolean, default: true},
-    created_by: {type: mongoose.Schema.Types.ObjectId, ref: 'users', required: true},
+    created_by: {type: mongoose.Schema.Types.ObjectId},
 
 },
     {
