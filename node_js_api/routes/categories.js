@@ -19,9 +19,15 @@ router.post('/add', async (req, res) => {
     let body = req.body;
     try{
 
-        if(!body.name) throw new CustomError('Name is required', 'Name is required', Enum.HTTP_CODES.BAD_REQUEST);
+        if(!body.name) throw new CustomError('Validation Error', 'Name is required', Enum.HTTP_CODES.BAD_REQUEST);
 
-        const category = await Categories.create(req.body);
+        let category =  new Categories({
+            name: body.name,
+            is_active: true,
+            created_by: req.user?._id
+        });
+
+        await category.save();
         res.send(Response.successResponse(category, Enum.HTTP_CODES.CREATED));
     }catch(error){
         let errorResponse = Response.errorResponse(error);
@@ -33,7 +39,7 @@ router.post('/update', async (req, res) => {
     let body = req.body;
     try{
 
-        if(!body.id) throw new CustomError('Id is required', 'Id is required', Enum.HTTP_CODES.BAD_REQUEST);
+        if(!body.id) throw new CustomError('Validation Error', 'Id is required', Enum.HTTP_CODES.BAD_REQUEST);
 
         let updates = {};
         if(body.name) updates.name = body.name;
@@ -50,7 +56,7 @@ router.post('/update', async (req, res) => {
 router.post('/delete', async (req, res) => {
     let body = req.body;
     try{
-        if(!body.id) throw new CustomError('Id is required', 'Id is required', Enum.HTTP_CODES.BAD_REQUEST);
+        if(!body.id) throw new CustomError('Validation Error', 'Id is required', Enum.HTTP_CODES.BAD_REQUEST);
         let category = await Categories.deleteOne({_id: body.id});
         res.send(Response.successResponse(category, Enum.HTTP_CODES.OK));
     }catch(error){
