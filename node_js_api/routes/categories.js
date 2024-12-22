@@ -4,6 +4,7 @@ const Categories = require('../db/models/Categories');
 const Response = require('../lib/Response');
 const CustomError = require('../lib/Error');
 const Enum = require('../config/Enum');
+const AuditLogs = require('../lib/AuditLogs');
 
 router.get('/', async (req, res) => {
     try{
@@ -28,6 +29,7 @@ router.post('/add', async (req, res) => {
         });
 
         await category.save();
+        AuditLogs.info(req.user?.email, 'Categories', 'add', category);
         res.send(Response.successResponse(category, Enum.HTTP_CODES.CREATED));
     }catch(error){
         let errorResponse = Response.errorResponse(error);

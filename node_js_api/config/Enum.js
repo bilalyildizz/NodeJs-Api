@@ -10,5 +10,10 @@ module.exports = {
     },
     PASSWORD_MIN_LENGTH: 8,
     PASSWORD_MAX_LENGTH: 16,
-    SUPER_ADMIN: 'SUPER_ADMIN'
+    SUPER_ADMIN: 'SUPER_ADMIN',
+    LOG_LEVELS: {
+        "INFO": "INFO",
+        "ERROR": "ERROR",
+        "WARNING": "WARNING"
+    }
 }
