@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 
 const fs = require('fs');
+// eslint-disable-next-line no-undef
 const routes = fs.readdirSync(__dirname);
 
 routes.forEach(route => {
