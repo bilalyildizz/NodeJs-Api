@@ -8,8 +8,11 @@ const is_js = require('is_js');
 const Response = require('../lib/Response');
 const Role = require('../db/models/Roles');
 const UserRole = require('../db/models/UserRoles');
+const config = require('../config');
+const jwt = require('jwt-simple');
 
 /* GET users listing. */
+// eslint-disable-next-line no-unused-vars
 router.get('/', async function(req, res, next) {
     try{
         let users = await User.find({});
@@ -61,8 +64,6 @@ router.post('/add', async (req, res) => {
   }
 });
 
-
-
 router.post('/update', async (req, res) => {
   let body = req.body;
 
@@ -105,7 +106,6 @@ router.post('/update', async (req, res) => {
     res.status(errorResponse.code).send(errorResponse);
   }
 });
-
 
 router.post('/delete', async (req, res) => {
   let body = req.body;
@@ -157,11 +157,11 @@ router.post('/register', async (req, res) => {
       created_by: createdUser._id
     });
 
-    // await UserRole.create({
-    //   user_id: createdUser._id,
-    //   role_id: role._id,
-    //   created_by: createdUser._id
-    // });
+    await UserRole.create({
+      user_id: createdUser._id,
+      role_id: role._id,
+      created_by: createdUser._id
+    });
     
     res.status(Enum.HTTP_CODES.CREATED).send(Response.successResponse({success: true}, Enum.HTTP_CODES.CREATED));
 
@@ -170,6 +170,40 @@ router.post('/register', async (req, res) => {
     res.status(errorResponse.code).send(errorResponse);
   }
 });
+
+router.post('/auth', async (req, res) => {
+    try{
+      let {email, password} = req.body;
+
+      User.validateFieldsBeforeAuth(email, password);
+
+      let user = await User.findOne({email: email});
+
+      if(!user) throw new CustomError(Enum.HTTP_CODES.UNAUTHORIZED, 'Validation error', 'Invalid email or password');
+
+      if(!user.validPassword(password)) throw new CustomError(Enum.HTTP_CODES.UNAUTHORIZED, 'Validation error', 'Invalid email or password');
+
+      let payload = {
+        _id: user._id,
+        exp: parseInt(Date.now() / 1000) + config.JWT.EXPIRE_TIME
+      }
+
+      let token = jwt.encode(payload, config.JWT.SECRET);
+
+      let userData = {
+        id: user._id,
+        firstName: user.first_name,
+        lastName: user.last_name,
+      }
+
+      res.status(Enum.HTTP_CODES.OK).send(Response.successResponse({userData, token}, Enum.HTTP_CODES.OK));
+
+    }
+    catch(error){
+      let errorResponse = Response.errorResponse(error);
+      res.status(errorResponse.code).send(errorResponse);
+    }
+  });
 
 
 module.exports = router;

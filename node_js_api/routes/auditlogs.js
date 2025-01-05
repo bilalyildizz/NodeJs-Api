@@ -4,7 +4,11 @@ const moment = require('moment');
 const AuditLogs = require('../db/models/AuditLogs');
 const Response = require('../lib/Response');
 const Enum = require('../config/Enum');
+const auth = require('../lib/auth')();
 
+router.all('*', auth.authenticate(), (req, res, next) => {
+    next();
+});
 
 router.post('/', async (req, res) => {
     try{
@@ -29,8 +33,8 @@ router.post('/', async (req, res) => {
             .limit(limit)
             .sort({created_at: -1})
             .skip(skip);
-        console.log(auditLogs);
-        res.send(Response.successResponse(auditLogs, Enum.HTTP_CODES.OK));
+        // console.log(auditLogs);
+        return res.send(Response.successResponse(auditLogs, Enum.HTTP_CODES.OK));
     
     }catch(error){
         let errorResponse = Response.errorResponse(error);
